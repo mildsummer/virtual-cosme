@@ -1,7 +1,43 @@
 $font-stack:    Helvetica, sans-serif;
 $primary-color: #333;
+$slider-height: 20px;
 
 body {
   font: 100% $font-stack;
   color: $primary-color;
+}
+
+.slider {
+  width: 100%;
+  max-width: 255px;
+  height: $slider-height;
+}
+
+.handle {
+  width: 5px;
+  height: $slider-height;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.sliders-color-back {
+  margin-top: -$slider-height;
+  width: 100%;
+  max-width: 255px;
+  height: 20px;
+}
+
+#sliders-alpha, #sliders-blur, #sliders-size {
+  .slider {
+    background-color: $primary-color;
+  }
+}
+
+#brush-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+
+#brush {
+  position: absolute;
 }

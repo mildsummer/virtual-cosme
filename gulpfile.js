@@ -5,7 +5,7 @@ var gulp = require('gulp'),
     MockServer = require('easymock').MockServer;
 
 gulp.task('js', function() {
-    return gulp.src(['src/js/*.js'])
+    gulp.src(['src/js/*.js'])
         .pipe(babel())
         .pipe(gulp.dest('build/js'));
 });
@@ -33,7 +33,7 @@ gulp.task('server', ['mock'], function() {
 
 gulp.task('html', function () {
     gulp.src('./src/*.html')
-        .pipe(gulp.dest('./build/css'));
+        .pipe(gulp.dest('./build'));
 });
 
 gulp.task('sass', function () {
@@ -43,12 +43,10 @@ gulp.task('sass', function () {
         .pipe(gulp.dest('./build/css'));
 });
 
-gulp.task('watch', ['sass', 'html', 'js'], function () {
+gulp.task('watch', ['html', 'sass', 'js'], function () {
     gulp.watch(['./src/*.html'], ['html']);
     gulp.watch(['./src/sass/*.scss'], ['sass']);
     gulp.watch(['./src/js/*.js'], ['js']);
 });
 
 gulp.task('default', ['server', 'watch']);
-
- 

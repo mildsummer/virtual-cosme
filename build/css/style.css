@@ -1,3 +1,30 @@
 body {
   font: 100% Helvetica, sans-serif;
   color: #333; }
+
+.slider {
+  width: 100%;
+  max-width: 255px;
+  height: 20px; }
+
+.handle {
+  width: 5px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.7); }
+
+.sliders-color-back {
+  margin-top: -20px;
+  width: 100%;
+  max-width: 255px;
+  height: 20px; }
+
+#sliders-alpha .slider, #sliders-blur .slider, #sliders-size .slider {
+  background-color: #333; }
+
+#brush-container {
+  position: relative;
+  width: 300px;
+  height: 300px; }
+
+#brush {
+  position: absolute; }

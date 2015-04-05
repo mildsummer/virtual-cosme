@@ -4,13 +4,13 @@ var gulp = require('gulp'),
     server = require('gulp-webserver'),
     MockServer = require('easymock').MockServer;
 
-gulp.task('default', function() {
+gulp.task('js', function() {
     return gulp.src(['src/js/*.js'])
         .pipe(babel())
         .pipe(gulp.dest('build/js'));
 });
 
-gulp.task('easymock', function () {
+gulp.task('mock', function () {
     var ms = new MockServer({
         keepalive: true,
         port: 3000,
@@ -33,21 +33,22 @@ gulp.task('server', ['mock'], function() {
 
 gulp.task('html', function () {
     gulp.src('./src/*.html')
-        .pipe(connect.reload());
+        .pipe(gulp.dest('./build/css'));
 });
 
 gulp.task('sass', function () {
     gulp.src('./src/sass/*.scss')
         .pipe(sass({includePaths: ['./styles'],
                     errLogToConsole: true}))
-        .pipe(gulp.dest('./build/css'))
-        .pipe(connect.reload());
+        .pipe(gulp.dest('./build/css'));
 });
 
-gulp.task('watch', ['sass', 'html'], function () {
+gulp.task('watch', ['sass', 'html', 'js'], function () {
     gulp.watch(['./src/*.html'], ['html']);
     gulp.watch(['./src/sass/*.scss'], ['sass']);
+    gulp.watch(['./src/js/*.js'], ['js']);
 });
 
 gulp.task('default', ['server', 'watch']);
+
  

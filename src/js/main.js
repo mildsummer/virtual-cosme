@@ -168,9 +168,9 @@ var FaceCanvas = React.createClass({
       $(canvas).mouseup(function(){
         mousedown = false;
       });
-      $(canvas).mouseout(function(){
-        mousedown = false;
-      });
+      //$(canvas).mouseout(function(){
+      //  mousedown = false;
+      //});
       $(canvas).mousemove(function(e){
         if(!mousedown) return false;
         var rect = canvas.getBoundingClientRect(),
@@ -185,26 +185,33 @@ var FaceCanvas = React.createClass({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = rgbToHex(brush.color.r, brush.color.g, brush.color.b);
       console.log(brush.size/2-brush.blur);
-      if(brush.blur!=0){//ぼかしはradialGradientを使う
-        this.state.points.forEach(function(p){
-          var grad = ctx.createRadialGradient(p[0], p[1], 10, p[0], p[1], brush.size/2+brush.blur);
-          ctx.fillStyle = grad;
-          grad.addColorStop(0, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 1)");
-          grad.addColorStop(1, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0)");
-          ctx.fillRect(p[0]-brush.size/2-brush.blur, p[1]-brush.size/2-brush.blur, brush.size+brush.blur*2, p[1], brush.size+brush.blur*2);
-        });
-      } else {
+      //if(brush.blur!=0){//ぼかしはradialGradientを使う
+      //  this.state.points.forEach(function(p){
+      //    var grad = ctx.createRadialGradient(p[0], p[1], 10, p[0], p[1], brush.size/2+brush.blur);
+      //    ctx.fillStyle = grad;
+      //    grad.addColorStop(0, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 1)");
+      //    grad.addColorStop(1, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0)");
+      //    ctx.fillRect(p[0]-brush.size/2-brush.blur, p[1]-brush.size/2-brush.blur, brush.size+brush.blur*2, p[1], brush.size+brush.blur*2);
+      //  });
+      //} else {
         this.state.points.forEach(function(p){
           ctx.beginPath();
           ctx.arc(p[0], p[1], brush.size/2, 0, Math.PI*2, false);
           ctx.fill();
         });
-      }
+      //}
+    },
+    clear() {
+      this.setState({points:[]});
     },
     render() {
       this.paint();
       return (
-        <canvas id="face" ref="canvas" width={this.props.width} height={this.props.height} style={{opacity: this.props.brush.alpha/100}}/>
+        <div id="face-container">
+          <canvas id="face" ref="canvas" width={this.props.width} height={this.props.height}
+            style={{opacity: this.props.brush.alpha/100, webkitFilter: 'blur('+ this.props.brush.blur +'px)'}}/>
+          <button id="face-clear-button" onClick={this.clear}>Clear</button>
+        </div>
       );
     }
 });

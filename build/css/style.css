@@ -18,7 +18,7 @@ body {
   max-width: 255px;
   height: 20px; }
 
-#sliders-alpha .slider, #sliders-blur .slider, #sliders-size .slider {
+#sliders-alpha .slider, #sliders-blur .slider, #sliders-size .slider, #sliders-undo .slider {
   background-color: #333; }
 
 #brush-container {

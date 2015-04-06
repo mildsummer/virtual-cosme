@@ -126,8 +126,7 @@ var FaceCanvas = React.createClass({
             
           //描画ポイント配列がアンドゥされていたら、それ以降を消去し、新しいポイントをつなげる
           points = this.state.points.length > this.state.length ? this.state.points.slice(0, this.state.length).concat([[x, y]]) : this.state.points.concat([[x, y]]);
-          
-          console.log(this.state.points.length + ", " + this.state.length);
+        
         this.setState({points: points,
                        mousedown: true,
                        length: this.state.length + 1
@@ -154,11 +153,21 @@ var FaceCanvas = React.createClass({
         }
       } else {
         ctx.fillStyle = rgbToHex(brush.color.r, brush.color.g, brush.color.b);
-        for(var i=0; i<l; i++){
+        //ctx.strokeStyle = rgbToHex(brush.color.r, brush.color.g, brush.color.b);
+        //ctx.lineWidth = brush.size;
+        //ctx.arc(pa[0][0], pa[0][1], brush.size/2, 0, Math.PI*2, false);
+        //ctx.fill();
+        for(var i=1; i<l; i++){
           var p = pa[i];
+          //    pp = pa[i-1];
+          //ctx.beginPath();
+          //ctx.moveTo(pp[0], pp[1]);
+          //ctx.lineTo(p[0], p[1]);
+          //ctx.stroke();
           ctx.beginPath();
           ctx.arc(p[0], p[1], brush.size/2, 0, Math.PI*2, false);
           ctx.fill();
+          //ctx.closePath();
         };
       }
     },
@@ -171,7 +180,8 @@ var FaceCanvas = React.createClass({
         <div id="face-container">
           <canvas id="face" ref="canvas" width={this.props.width} height={this.props.height} 
             onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} 
-            style={{opacity: this.props.brush.alpha/100, webkitFilter: 'blur('+ this.props.brush.blur +'px)'}}/>
+            style={{opacity: this.props.brush.alpha/100}}/>
+          <div id="face-img"></div>
           <button id="face-clear-button" onClick={this.clear}>Clear</button>
           <div className="sliders" id="sliders-undo">
             <ReactSlider ref="undo" min={0} max={this.state.points.length} defaultValue={0} value={this.state.length} onChange={this.undoChange} />

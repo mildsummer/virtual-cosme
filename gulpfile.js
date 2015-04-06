@@ -37,6 +37,11 @@ gulp.task('html', function () {
         .pipe(gulp.dest('./build'));
 });
 
+gulp.task('img', function () {
+    gulp.src('./src/img/*')
+        .pipe(gulp.dest('./build/img'));
+});
+
 gulp.task('sass', function () {
     gulp.src('./src/sass/*.scss')
         .pipe(sass({includePaths: ['./styles'],
@@ -44,12 +49,11 @@ gulp.task('sass', function () {
         .pipe(gulp.dest('./build/css'));
 });
 
-gulp.task('watch', ['html', 'sass', 'js'], function () {
+gulp.task('watch', ['html', 'sass', 'js', 'img'], function () {
     gulp.watch(['./src/*.html'], ['html']);
     gulp.watch(['./src/sass/*.scss'], ['sass']);
     gulp.watch(['./src/js/*.js'], ['js']);
+    gulp.watch(['./src/img/*'], ['img']);
 });
 
 gulp.task('default', ['server', 'watch']);
-
-gulp.task('heroku', ['server']);

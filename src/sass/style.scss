@@ -41,3 +41,10 @@ body {
 #brush {
   position: absolute;
 }
+
+div#face-img {
+  margin-top: -500px;
+  width: 500px;
+  height: 500px;
+  background-image: url('../img/face.jpg');
+}

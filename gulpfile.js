@@ -27,6 +27,7 @@ gulp.task('server', ['mock'], function() {
             source: '/json',
             target: 'http://localhost:3000'
         }],
+        port: process.env.PORT || 5000, // localhost:5000
         open: true
     }));
 });

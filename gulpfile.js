@@ -51,3 +51,5 @@ gulp.task('watch', ['html', 'sass', 'js'], function () {
 });
 
 gulp.task('default', ['server', 'watch']);
+
+gulp.task('heroku', ['server']);

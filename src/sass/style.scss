@@ -7,6 +7,10 @@ body {
   color: $primary-color;
 }
 
+#ui {
+  position: relative;
+}
+
 .slider {
   width: 100%;
   max-width: 255px;
@@ -36,10 +40,11 @@ body {
   position: relative;
   width: 300px;
   height: 300px;
-}
-
-#brush {
-  position: absolute;
+  .brush {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
 }
 
 div#face-img {
@@ -47,4 +52,18 @@ div#face-img {
   width: 500px;
   height: 500px;
   background-image: url('../img/face.jpg');
+}
+
+#registration-pane {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.cosme {
+  .brush {
+    background-position: left center;
+  }
 }

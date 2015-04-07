@@ -4,19 +4,20 @@
   "description": "",
   "main": "gulpfile.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "gulp"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "bower": "^1.4.1",
+    "browserify": "^9.0.7",
     "easymock": "^0.2.15",
     "gulp": "^3.8.11",
     "gulp-babel": "^4.0.1",
     "gulp-sass": "^1.3.3",
     "gulp-webserver": "^0.9.0",
     "install": "^0.1.8",
-    "npm": "^2.7.4"
+    "npm": "^2.7.4",
+    "vinyl-source-stream": "^1.1.0"
   }
 }

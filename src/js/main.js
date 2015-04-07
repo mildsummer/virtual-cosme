@@ -113,10 +113,10 @@ var FaceCanvas = React.createClass({
       ctx = canvas.getContext("2d");
     },
     onMouseDown() {
-      this.setState({points:this.state.points, mousedown: true, length: this.state.length});
+      this.setState({mousedown: true});
     },
     onMouseUp() {
-      this.setState({points:this.state.points, mousedown: false, length: this.state.length});
+      this.setState({mousedown: false});
     },
     onMouseMove(e) {
       if(this.state.mousedown){
@@ -172,7 +172,7 @@ var FaceCanvas = React.createClass({
       }
     },
     undoChange() {
-      this.setState({points:this.state.points, mousedown: this.state.mousedown, length: this.refs.undo.getValue()});
+      this.setState({length: this.refs.undo.getValue()});
     },
     render() {
       this.paint();
@@ -191,56 +191,160 @@ var FaceCanvas = React.createClass({
     }
 });
 
-var App = React.createClass({
-    getInitialState() {
-        return {
-            color: {
-                r: 0,
-                g: 0,
-                b: 0
-            },
-            alpha: 100,
-            size: 50,
-            blur: 0
-        };
-    },
-    onChange(key, param) {
-        //間接的にstateを変更
-        var state = {};
-        $.extend(true, state, this.state);
-        state[key] = param;
-        this.setState(state);
+var RegistrationPane = React.createClass({
+    handleSubmit(e) {
+        e.preventDefault();
+        this.props.onSubmit({
+            name:this.refs.cosmeName.getDOMNode().value,
+            colorName:this.refs.cosmeColorName.getDOMNode().value,
+            brand:this.refs.cosmeBland.getDOMNode().value
+        });
+        this.props.close();
     },
     render() {
-      var clrstr = [this.state.color.r, this.state.color.g, this.state.color.b].join(",");
+        return (
+          <div id="registration-pane">
+            <div id="registration-container">
+              <form onSubmit={this.handleSubmit}>
+                <input type="text" ref="cosmeName"></input>
+                <input type="text" ref="cosmeColorName"></input>
+                <input type="text" ref="cosmeBland"></input>
+                <input type="submit"></input>
+              </form>
+              <span onClick={this.props.close}>閉じる</span>
+            </div>
+          </div>        
+        );
+    }
+});
+
+var Cosme = React.createClass({
+    render: function() {
+        var cosme = this.props.cosme;
+        var content = function() {
+          return (
+            <p>{cosme.name}<br />
+            {cosme.colorName}<br />
+            /{cosme.brand}</p> 
+          );
+        };
+        return (
+          <li className="cosme">
+            <Brush brush={cosme.brush} content={content()} position="20 center" />
+          </li>
+        );
+    }
+});
+
+var CosmeList = React.createClass({
+    render: function() {
+        var rows = this.props.cosmes.map(function(cosme) {
+          return (<Cosme key={cosme.id} cosme={cosme} />);
+        });
+        return (
+          <div id="cosme-list">
+            <ul>
+              {rows}
+            </ul>
+          </div>
+        );
+    }
+});
+
+//サンプルデータ
+var cosmes = [
+    {
+        id: 0,
+        brush: {
+          color: {
+            r: 255,
+            g: 50,
+            b: 100
+          },
+          alpha: 100,
+          size: 50,
+          blur: 0
+        },
+        name: "リップスティック",
+        colorName: "1023",
+        brand: "NARS"
+    }
+];
+
+var Brush = React.createClass({
+    render() {
+      var brush = this.props.brush;
+        console.log(this.props);
+      var clrstr = [brush.color.r, brush.color.g, brush.color.b].join(",");
+      return (
+        <div className="brush" style={
+          {
+            //width: brush.size+brush.blur*2,
+            //height: brush.size+brush.blur*2,
+            //top: 150-brush.size/2-brush.blur,
+            //left: 150-brush.size/2-brush.blur,
+            //borderRadius: brush.size/2+brush.blur,
+            //backgroundColor: rgbToHex(brush.color.r, brush.color.g, brush.color.b),
+            background: '-webkit-gradient(radial, ' + this.props.position + ', '
+            + (brush.size/2 - brush.blur - 1 ) //startとendが同じだと表示されない
+            + ', ' + this.props.position + ', ' + (brush.size/2 + brush.blur)
+            + ', from(rgba(' + clrstr + ',' + brush.alpha/100
+            + ')), to(rgba(' + clrstr + ',0)))',
+          }
+        }>{this.props.content}</div>
+      )
+    }
+});
+
+var App = React.createClass({
+    getInitialState() {
+      return {
+        brush: {
+          color: {
+            r: 0,
+            g: 0,
+            b: 0
+          },
+          alpha: 100,
+          size: 50,
+          blur: 0
+        },
+        cosmes: cosmes,
+        isRegistering: false
+      };
+    },
+    changeBrush(key, param) {
+      var state = _.clone(this.state, true);
+      state.brush[key] = param;
+      this.setState(state);
+    },
+    toggleRegistrationPane() {
+      this.setState({isRegistering: !this.state.isRegistering});
+    },
+    register(cosme) {
+      cosme.brush = this.state.brush;
+      cosme.id = this.state.cosmes.length;
+      this.setState({cosmes: this.state.cosmes.concat([cosme])});
+    },
+    render() {
+        var brush = this.state.brush;
         return(
-            <div className="ui">
+            <div id="ui">
+                {this.state.isRegistering ? (<RegistrationPane onSubmit={this.register} close={this.toggleRegistrationPane} />) : null}
                 <div id="brush-container" ref="brush-container">
-                  <div id="brush" style={
-                    {
-                      width: this.state.size+this.state.blur*2,
-                      height: this.state.size+this.state.blur*2,
-                      top: 150-this.state.size/2-this.state.blur,
-                      left: 150-this.state.size/2-this.state.blur,
-                      borderRadius: this.state.size/2+this.state.blur,
-                      //backgroundColor: rgbToHex(this.state.color.r, this.state.color.g, this.state.color.b),
-                      background: '-webkit-gradient(radial, center center, '
-                        + (this.state.size/2 - this.state.blur - 1 ) //startとendが同じだと表示されない
-                        + ', center center, ' + (this.state.size/2 + this.state.blur)
-                        + ', from(rgba(' + clrstr + ',' + this.state.alpha/100
-                        + ')), to(rgba(' + clrstr + ',0)))',
-                    }
-                  }></div>
+                  <Brush brush={brush} content={null} position="center center"/>
                 </div>
-                <span>R:{this.state.color.r} G:{this.state.color.g} B:{this.state.color.b} Alpha:{this.state.alpha} Size:{this.state.size} Blur:{this.state.blur}</span>
-                <ColorSliders onChange={this.onChange} color={this.state.color} />
-                <AlphaSliders onChange={this.onChange} />
-                <SizeSliders onChange={this.onChange} />
-                <BlurSliders onChange={this.onChange} size={this.state.size} />
-                <FaceCanvas brush={this.state} width={500} height={500} />
+                <span>R:{brush.color.r} G:{brush.color.g} B:{brush.color.b} Alpha:{brush.alpha} Size:{brush.size} Blur:{brush.blur}</span>
+                <ColorSliders onChange={this.changeBrush} color={brush.color} />
+                <AlphaSliders onChange={this.changeBrush} />
+                <SizeSliders onChange={this.changeBrush} />
+                <BlurSliders onChange={this.changeBrush} size={brush.size} />
+                <FaceCanvas brush={brush} width={500} height={500} />
+                <button id="registration-open-button" onClick={this.toggleRegistrationPane} >登録する</button>
+                <CosmeList cosmes={this.state.cosmes} />
             </div>
         );
     }
 });
 
-React.render(<App />, $("#container").get(0));
+React.render(<App />, document.getElementById("container"));

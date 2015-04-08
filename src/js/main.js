@@ -18,7 +18,7 @@ var BlurSliders = React.createClass({
     render() {
       return (
           <div className="sliders" id="sliders-blur">
-            <ReactSlider ref="slider" min={0} max={Math.floor(this.props.size/2)} onAfterChange={this.onChange} defaultValue={0} />
+            <ReactSlider ref="slider" min={0} max={Math.floor(this.props.size/2)} onChange={this.onChange} defaultValue={0} />
           </div>
         );
     }
@@ -192,25 +192,46 @@ var FaceCanvas = React.createClass({
 });
 
 var RegistrationPane = React.createClass({
+    getInitialState() {
+        return {
+            isDraggingOver: false,
+            imgUrl: null
+        };
+    },
     handleSubmit(e) {
         e.preventDefault();
         this.props.onSubmit({
-            name:this.refs.cosmeName.getDOMNode().value,
-            colorName:this.refs.cosmeColorName.getDOMNode().value,
-            brand:this.refs.cosmeBland.getDOMNode().value
+            name: this.refs.cosmeName.getDOMNode().value,
+            colorName: this.refs.cosmeColorName.getDOMNode().value,
+            brand: this.refs.cosmeBland.getDOMNode().value,
+            imgUrl: this.state.imgUrl
         });
         this.props.close();
     },
+    onDragOver(e) {
+        this.setState({isDraggingOver: true});
+        e.preventDefault();
+    },
+    onDragLeave(e) {
+        this.setState({isDraggingOver: false});
+        e.preventDefault();
+    },
+    onDrop(e) {
+        var imgUrl = e.dataTransfer.getData("url");
+        this.setState({imgUrl: imgUrl, isDraggingOver: false});
+        e.preventDefault();
+    },
     render() {
         return (
-          <div id="registration-pane">
-            <div id="registration-container">
+          <div id="registration-pane" onDragLeave={this.onDragLeave} onDrop={this.onDrop} onDragOver={this.onDragOver} className={this.state.isDraggingOver ? "dragging-over" : "not-dragging-over"}>
+            <div id="registration-container" onDrop={this.onDropImage} >
               <form onSubmit={this.handleSubmit}>
                 <input type="text" ref="cosmeName"></input>
                 <input type="text" ref="cosmeColorName"></input>
                 <input type="text" ref="cosmeBland"></input>
                 <input type="submit"></input>
               </form>
+              {("imgUrl" in this.state) ? (<img src={this.state.imgUrl} />) : null}
               <span onClick={this.props.close}>閉じる</span>
             </div>
           </div>        
@@ -219,18 +240,25 @@ var RegistrationPane = React.createClass({
 });
 
 var Cosme = React.createClass({
+    onClick() {
+        this.props.onClickCosme(this.props.cosme);
+    },
     render: function() {
         var cosme = this.props.cosme;
-        var content = function() {
-          return (
+        var clrstr = [cosme.brush.color.r, cosme.brush.color.g, cosme.brush.color.b].join(",");
+        return (
+          <li className="cosme" onClick={this.onClick} style={{
+            background: '-webkit-gradient(radial, 20 center, '
+            + (cosme.brush.size/2 - cosme.brush.blur - 1 ) //startとendが同じだと表示されない
+            + ', 20 center, ' + (cosme.brush.size/2 + cosme.brush.blur)
+            + ', from(rgba(' + clrstr + ',' + cosme.brush.alpha/100
+            + ')), to(rgba(' + clrstr + ',0)))' + (cosme.imgUrl ? ', url(' + cosme.imgUrl + ')' : ''),
+            backgroundPosition: 'center center, right center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'auto, contain'}}>
             <p>{cosme.name}<br />
             {cosme.colorName}<br />
             /{cosme.brand}</p> 
-          );
-        };
-        return (
-          <li className="cosme">
-            <Brush brush={cosme.brush} content={content()} position="20 center" />
           </li>
         );
     }
@@ -238,9 +266,13 @@ var Cosme = React.createClass({
 
 var CosmeList = React.createClass({
     render: function() {
-        var rows = this.props.cosmes.map(function(cosme) {
-          return (<Cosme key={cosme.id} cosme={cosme} />);
-        });
+        if(!this.props.cosmes) {
+          return false;
+        } else {
+          var rows = this.props.cosmes.map((function(cosme) {
+            return (<Cosme onClickCosme={this.props.onClickCosme} key={cosme.id} cosme={cosme} />);
+          }).bind(this));
+        }
         return (
           <div id="cosme-list">
             <ul>
@@ -267,14 +299,14 @@ var cosmes = [
         },
         name: "リップスティック",
         colorName: "1023",
-        brand: "NARS"
+        brand: "NARS",
+        imgUrl: "http://www.narsjapan.com/html/color/lipstick_img/main_lipstick.jpg"
     }
 ];
 
 var Brush = React.createClass({
     render() {
       var brush = this.props.brush;
-        console.log(this.props);
       var clrstr = [brush.color.r, brush.color.g, brush.color.b].join(",");
       return (
         <div className="brush" style={
@@ -285,19 +317,21 @@ var Brush = React.createClass({
             //left: 150-brush.size/2-brush.blur,
             //borderRadius: brush.size/2+brush.blur,
             //backgroundColor: rgbToHex(brush.color.r, brush.color.g, brush.color.b),
-            background: '-webkit-gradient(radial, ' + this.props.position + ', '
+            background: '-webkit-gradient(radial, center center, '
             + (brush.size/2 - brush.blur - 1 ) //startとendが同じだと表示されない
-            + ', ' + this.props.position + ', ' + (brush.size/2 + brush.blur)
+            + ', center center, ' + (brush.size/2 + brush.blur)
             + ', from(rgba(' + clrstr + ',' + brush.alpha/100
             + ')), to(rgba(' + clrstr + ',0)))',
           }
-        }>{this.props.content}</div>
+        }></div>
       )
     }
 });
 
 var App = React.createClass({
     getInitialState() {
+      var cosmes = JSON.parse(localStorage.getItem("cosmes"));
+      console.log(cosmes);
       return {
         brush: {
           color: {
@@ -322,9 +356,17 @@ var App = React.createClass({
       this.setState({isRegistering: !this.state.isRegistering});
     },
     register(cosme) {
+      var cosmes = this.state.cosmes ? this.state.cosmes : [];
       cosme.brush = this.state.brush;
-      cosme.id = this.state.cosmes.length;
-      this.setState({cosmes: this.state.cosmes.concat([cosme])});
+      cosme.id =  cosmes.length;
+      cosmes = cosmes.concat([cosme]);
+      this.setState({cosmes: cosmes});
+      
+      //とりあえずlocalStrageに保存
+      localStorage.setItem("cosmes", JSON.stringify(cosmes));
+    },
+    setCosme(cosme) {
+      this.setState({brush: _.clone(cosme.brush, true)});
     },
     render() {
         var brush = this.state.brush;
@@ -341,7 +383,7 @@ var App = React.createClass({
                 <BlurSliders onChange={this.changeBrush} size={brush.size} />
                 <FaceCanvas brush={brush} width={500} height={500} />
                 <button id="registration-open-button" onClick={this.toggleRegistrationPane} >登録する</button>
-                <CosmeList cosmes={this.state.cosmes} />
+                <CosmeList onClickCosme={this.setCosme} cosmes={this.state.cosmes} />
             </div>
         );
     }

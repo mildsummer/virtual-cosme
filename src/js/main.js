@@ -5,7 +5,7 @@ var SizeSliders = React.createClass({
     render() {
       return (
           <div className="sliders" id="sliders-size">
-            <ReactSlider ref="slider" min={1} max={100} onChange={this.onChange} defaultValue={50} />
+            <ReactSlider ref="slider" min={1} max={100} onChange={this.onChange} defaultValue={50} value={this.props.value} />
           </div>
         );
     }
@@ -18,7 +18,7 @@ var BlurSliders = React.createClass({
     render() {
       return (
           <div className="sliders" id="sliders-blur">
-            <ReactSlider ref="slider" min={0} max={Math.floor(this.props.size/2)} onChange={this.onChange} defaultValue={0} />
+            <ReactSlider ref="slider" min={0} max={Math.floor(this.props.size/2)} onChange={this.onChange} defaultValue={0} value={this.props.value} />
           </div>
         );
     }
@@ -31,7 +31,7 @@ var AlphaSliders = React.createClass({
     render() {
       return (
           <div className="sliders" id="sliders-alpha">
-            <ReactSlider ref="slider" min={10} max={100} onChange={this.onChange} defaultValue={100} />
+            <ReactSlider ref="slider" min={10} max={100} onChange={this.onChange} defaultValue={100} value={this.props.value} />
           </div>
         );
     }
@@ -64,7 +64,7 @@ var ColorSliders = React.createClass({
         return (
             <div className="sliders" id="sliders-color">
                 <div id="sliders-color-r">
-                    <ReactSlider ref="r" min={0} max={255} onChange={this.onChange} />
+                    <ReactSlider ref="r" min={0} max={255} onChange={this.onChange} value={this.props.values.r} />
                     <div className="sliders-color-back" ref="r_back" style={
                         {
                           //background: 'linear-gradient(left, ' + backColors.r.start + ', ' + backColors.r.end + ')',
@@ -75,7 +75,7 @@ var ColorSliders = React.createClass({
                     </div>
                 </div>
                 <div id="sliders-color-g">
-                    <ReactSlider ref="g" min={0} max={255} onChange={this.onChange} />
+                    <ReactSlider ref="g" min={0} max={255} onChange={this.onChange} value={this.props.values.g} />
                     <div className="sliders-color-back" ref="g_back" style={
                         {
                           //background: 'linear-gradient(left, ' + backColors.g.start + ', ' + backColors.g.end + ')',
@@ -86,7 +86,7 @@ var ColorSliders = React.createClass({
                     </div>
                 </div>
                 <div id="sliders-color-b">
-                    <ReactSlider ref="b" min={0} max={255} onChange={this.onChange} />
+                    <ReactSlider ref="b" min={0} max={255} onChange={this.onChange} value={this.props.values.b} />
                     <div className="sliders-color-back" ref="b_back" style={
                         {
                           //background: 'linear-gradient(left, ' + backColors.b.start + ', ' + backColors.b.end + ')',
@@ -101,8 +101,46 @@ var ColorSliders = React.createClass({
     }
 });
 
+var Texture = React.createClass({
+    onClick() {
+        this.props.onClickTexture("textureIndex", this.props.texture.id);
+    },
+    render: function() {
+        var texture = this.props.texture;
+        return (
+          <li className="texture" onClick={this.onClick} style={{
+              background: texture.id > 0 ? 'url(/img/texture/' + texture.id + '.png) no-repeat center center / contain, #333' : '#333'
+            }}></li>
+        )
+    }
+});
+
+var TextureList = React.createClass({
+    render: function() {
+      var rows = this.props.textures.map((function(texture) {
+        return (<Texture onClickTexture={this.props.onChange} key={texture.id} texture={texture} />);
+      }).bind(this));
+      return (
+        <div id="texture-list">
+          <ul>
+            {rows}
+          </ul>
+        </div>
+      );
+    }
+});
 
 var canvas = {}, ctx = {};
+
+//テクスチャの読み込み
+//0番目は"テクスチャ無し"
+var textures = [{id:0}];
+for(var i=1; i<6; i++){
+  textures[i] = {id : i};
+  textures[i].img = new Image();
+  textures[i].img.src = "img/texture/" + i + ".png";
+  console.log(textures[i]);
+}
 
 var FaceCanvas = React.createClass({
     getInitialState(){
@@ -123,28 +161,30 @@ var FaceCanvas = React.createClass({
         var rect = canvas.getBoundingClientRect(),
           x = e.clientX - rect.left,
           y = e.clientY - rect.top,
-            
+
           //描画ポイント配列がアンドゥされていたら、それ以降を消去し、新しいポイントをつなげる
           points = this.state.points.length > this.state.length ? this.state.points.slice(0, this.state.length).concat([[x, y]]) : this.state.points.concat([[x, y]]);
-        
+
         this.setState({points: points,
                        mousedown: true,
                        length: this.state.length + 1
                       });//座標配列に追加してセット
       }
     },
-    clear() {
-      this.setState({points:[], mousedown: false, length: 0});
-    },
+    //clear() {
+    //  this.setState({points:[], mousedown: false, length: 0});
+    //},
     paint() {
-      if(!("fillStyle" in ctx)) return false; //初期化時はpaintしない
+      if(!("fillStyle" in ctx) | this.state.points.length < 1) {
+        return false; //初期化時はpaintしない
+      }
       var brush = this.props.brush,
-          pa = this.state.points,
+          points = this.state.points,
           l = this.state.length;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);//canvasのリセットはできれば最小限にしたほうがいい
       if(brush.blur!=0){//ぼかしはradialGradientを使う
         for(var i=0; i<l; i++){
-          var p = pa[i],
+          var p = points[i],
             grad = ctx.createRadialGradient(p[0], p[1], 10, p[0], p[1], brush.size/2+brush.blur);
           ctx.fillStyle = grad;
           grad.addColorStop(0, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0.1)");
@@ -158,7 +198,7 @@ var FaceCanvas = React.createClass({
         //ctx.arc(pa[0][0], pa[0][1], brush.size/2, 0, Math.PI*2, false);
         //ctx.fill();
         for(var i=1; i<l; i++){
-          var p = pa[i];
+          var p = points[i];
           //    pp = pa[i-1];
           //ctx.beginPath();
           //ctx.moveTo(pp[0], pp[1]);
@@ -170,6 +210,14 @@ var FaceCanvas = React.createClass({
           //ctx.closePath();
         };
       }
+
+      //テクスチャの描画
+      for(var i=1; i<l; i+=15){
+        var p = points[i];
+        if(textures[brush.textureIndex].img){
+          ctx.drawImage(textures[brush.textureIndex].img, p[0]-(brush.size+brush.blur)/2, p[1]-(brush.size+brush.blur)/2, brush.size+brush.blur, brush.size+brush.blur);
+        }
+      }
     },
     undoChange() {
       this.setState({length: this.refs.undo.getValue()});
@@ -178,11 +226,10 @@ var FaceCanvas = React.createClass({
       this.paint();
       return (
         <div id="face-container">
-          <canvas id="face" ref="canvas" width={this.props.width} height={this.props.height} 
-            onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} 
+          <canvas id="face" ref="canvas" width={this.props.width} height={this.props.height}
+            onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp}
             style={{opacity: this.props.brush.alpha/100}}/>
           <div id="face-img"></div>
-          <button id="face-clear-button" onClick={this.clear}>Clear</button>
           <div className="sliders" id="sliders-undo">
             <ReactSlider ref="undo" min={0} max={this.state.points.length} defaultValue={0} value={this.state.length} onChange={this.undoChange} />
           </div>
@@ -234,7 +281,7 @@ var RegistrationPane = React.createClass({
               {("imgUrl" in this.state) ? (<img src={this.state.imgUrl} />) : null}
               <span onClick={this.props.close}>閉じる</span>
             </div>
-          </div>        
+          </div>
         );
     }
 });
@@ -246,19 +293,22 @@ var Cosme = React.createClass({
     render: function() {
         var cosme = this.props.cosme;
         var clrstr = [cosme.brush.color.r, cosme.brush.color.g, cosme.brush.color.b].join(",");
+        var textureStyle = cosme.brush.textureIndex > 0 ? 'url(/img/texture/' + cosme.brush.textureIndex
+            + '.png) no-repeat ' + (20 - (cosme.brush.size + cosme.brush.blur)/2) + 'px center /'
+            + (cosme.brush.size + cosme.brush.blur) + 'px ' + (cosme.brush.size + cosme.brush.blur)
+            + 'px, ' : "";
+        var imageStyle = cosme.imgUrl ? ', url(' + cosme.imgUrl + ') no-repeat center right / contain' : ''
+        var style = {
+                background: textureStyle + '-webkit-gradient(radial, 20 center, '
+                  + (cosme.brush.size/2 - cosme.brush.blur - 1 ) //startとendが同じだと表示されない
+                  + ', 20 center, ' + (cosme.brush.size/2 + cosme.brush.blur)
+                  + ', from(rgba(' + clrstr + ',1)), to(rgba(' + clrstr + ',0)))' + imageStyle
+            };
         return (
-          <li className="cosme" onClick={this.onClick} style={{
-            background: '-webkit-gradient(radial, 20 center, '
-            + (cosme.brush.size/2 - cosme.brush.blur - 1 ) //startとendが同じだと表示されない
-            + ', 20 center, ' + (cosme.brush.size/2 + cosme.brush.blur)
-            + ', from(rgba(' + clrstr + ',' + cosme.brush.alpha/100
-            + ')), to(rgba(' + clrstr + ',0)))' + (cosme.imgUrl ? ', url(' + cosme.imgUrl + ')' : ''),
-            backgroundPosition: 'center center, right center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'auto, contain'}}>
+          <li className="cosme" onClick={this.onClick} style={style}>
             <p>{cosme.name}<br />
             {cosme.colorName}<br />
-            /{cosme.brand}</p> 
+            /{cosme.brand}</p>
           </li>
         );
     }
@@ -308,22 +358,19 @@ var Brush = React.createClass({
     render() {
       var brush = this.props.brush;
       var clrstr = [brush.color.r, brush.color.g, brush.color.b].join(",");
-      return (
-        <div className="brush" style={
-          {
-            //width: brush.size+brush.blur*2,
-            //height: brush.size+brush.blur*2,
-            //top: 150-brush.size/2-brush.blur,
-            //left: 150-brush.size/2-brush.blur,
-            //borderRadius: brush.size/2+brush.blur,
-            //backgroundColor: rgbToHex(brush.color.r, brush.color.g, brush.color.b),
-            background: '-webkit-gradient(radial, center center, '
+      var textureStyle = brush.textureIndex > 0 ? 'url(/img/texture/' + brush.textureIndex
+          + '.png) no-repeat center center /'
+          + (brush.size + brush.blur) + 'px ' + (brush.size + brush.blur)
+          + 'px, ' : "";
+      var style = {
+            opacity: brush.alpha/100,
+            background: textureStyle + '-webkit-gradient(radial, center center, '
             + (brush.size/2 - brush.blur - 1 ) //startとendが同じだと表示されない
             + ', center center, ' + (brush.size/2 + brush.blur)
-            + ', from(rgba(' + clrstr + ',' + brush.alpha/100
-            + ')), to(rgba(' + clrstr + ',0)))',
-          }
-        }></div>
+            + ', from(rgba(' + clrstr + ',1)), to(rgba(' + clrstr + ',0)))'
+          };
+      return (
+        <div className="brush" style={style}></div>
       )
     }
 });
@@ -341,7 +388,8 @@ var App = React.createClass({
           },
           alpha: 100,
           size: 50,
-          blur: 0
+          blur: 0,
+          textureIndex: 0
         },
         cosmes: cosmes,
         isRegistering: false
@@ -361,12 +409,13 @@ var App = React.createClass({
       cosme.id =  cosmes.length;
       cosmes = cosmes.concat([cosme]);
       this.setState({cosmes: cosmes});
-      
+
       //とりあえずlocalStrageに保存
       localStorage.setItem("cosmes", JSON.stringify(cosmes));
     },
     setCosme(cosme) {
-      this.setState({brush: _.clone(cosme.brush, true)});
+      var brush = _.clone(cosme.brush);//そのままsetStateすると参照になり変更できてしまう
+      this.setState({brush: brush, true});
     },
     render() {
         var brush = this.state.brush;
@@ -377,10 +426,11 @@ var App = React.createClass({
                   <Brush brush={brush} content={null} position="center center"/>
                 </div>
                 <span>R:{brush.color.r} G:{brush.color.g} B:{brush.color.b} Alpha:{brush.alpha} Size:{brush.size} Blur:{brush.blur}</span>
-                <ColorSliders onChange={this.changeBrush} color={brush.color} />
-                <AlphaSliders onChange={this.changeBrush} />
-                <SizeSliders onChange={this.changeBrush} />
-                <BlurSliders onChange={this.changeBrush} size={brush.size} />
+                <ColorSliders onChange={this.changeBrush} color={brush.color} values={brush.color} />
+                <AlphaSliders onChange={this.changeBrush} value={brush.alpha} />
+                <SizeSliders onChange={this.changeBrush} value={brush.size} />
+                <BlurSliders onChange={this.changeBrush} size={brush.size} value={brush.blur} />
+                <TextureList onChange={this.changeBrush} textures={textures} />
                 <FaceCanvas brush={brush} width={500} height={500} />
                 <button id="registration-open-button" onClick={this.toggleRegistrationPane} >登録する</button>
                 <CosmeList onClickCosme={this.setCosme} cosmes={this.state.cosmes} />

@@ -10,7 +10,7 @@ var SizeSliders = React.createClass({
     return React.createElement(
       "div",
       { className: "sliders", id: "sliders-size" },
-      React.createElement(ReactSlider, { ref: "slider", min: 1, max: 100, onChange: this.onChange, defaultValue: 50 })
+      React.createElement(ReactSlider, { ref: "slider", min: 1, max: 100, onChange: this.onChange, defaultValue: 50, value: this.props.value })
     );
   }
 });
@@ -25,7 +25,7 @@ var BlurSliders = React.createClass({
     return React.createElement(
       "div",
       { className: "sliders", id: "sliders-blur" },
-      React.createElement(ReactSlider, { ref: "slider", min: 0, max: Math.floor(this.props.size / 2), onChange: this.onChange, defaultValue: 0 })
+      React.createElement(ReactSlider, { ref: "slider", min: 0, max: Math.floor(this.props.size / 2), onChange: this.onChange, defaultValue: 0, value: this.props.value })
     );
   }
 });
@@ -40,7 +40,7 @@ var AlphaSliders = React.createClass({
     return React.createElement(
       "div",
       { className: "sliders", id: "sliders-alpha" },
-      React.createElement(ReactSlider, { ref: "slider", min: 10, max: 100, onChange: this.onChange, defaultValue: 100 })
+      React.createElement(ReactSlider, { ref: "slider", min: 10, max: 100, onChange: this.onChange, defaultValue: 100, value: this.props.value })
     );
   }
 });
@@ -76,21 +76,21 @@ var ColorSliders = React.createClass({
       React.createElement(
         "div",
         { id: "sliders-color-r" },
-        React.createElement(ReactSlider, { ref: "r", min: 0, max: 255, onChange: this.onChange }),
+        React.createElement(ReactSlider, { ref: "r", min: 0, max: 255, onChange: this.onChange, value: this.props.values.r }),
         React.createElement("div", { className: "sliders-color-back", ref: "r_back", style: {
             background: "-webkit-gradient(linear, left top, right top, from(" + backColors.r.start + "), to(" + backColors.r.end + "))" } })
       ),
       React.createElement(
         "div",
         { id: "sliders-color-g" },
-        React.createElement(ReactSlider, { ref: "g", min: 0, max: 255, onChange: this.onChange }),
+        React.createElement(ReactSlider, { ref: "g", min: 0, max: 255, onChange: this.onChange, value: this.props.values.g }),
         React.createElement("div", { className: "sliders-color-back", ref: "g_back", style: {
             background: "-webkit-gradient(linear, left top, right top, from(" + backColors.g.start + "), to(" + backColors.g.end + "))" } })
       ),
       React.createElement(
         "div",
         { id: "sliders-color-b" },
-        React.createElement(ReactSlider, { ref: "b", min: 0, max: 255, onChange: this.onChange }),
+        React.createElement(ReactSlider, { ref: "b", min: 0, max: 255, onChange: this.onChange, value: this.props.values.b }),
         React.createElement("div", { className: "sliders-color-back", ref: "b_back", style: {
             background: "-webkit-gradient(linear, left top, right top, from(" + backColors.b.start + "), to(" + backColors.b.end + "))" } })
       )
@@ -98,8 +98,51 @@ var ColorSliders = React.createClass({
   }
 });
 
+var Texture = React.createClass({
+  displayName: "Texture",
+
+  onClick: function onClick() {
+    this.props.onClickTexture("textureIndex", this.props.texture.id);
+  },
+  render: function render() {
+    var texture = this.props.texture;
+    return React.createElement("li", { className: "texture", onClick: this.onClick, style: {
+        background: texture.id > 0 ? "url(/img/texture/" + texture.id + ".png) no-repeat center center / contain, #333" : "#333"
+      } });
+  }
+});
+
+var TextureList = React.createClass({
+  displayName: "TextureList",
+
+  render: function render() {
+    var rows = this.props.textures.map((function (texture) {
+      return React.createElement(Texture, { onClickTexture: this.props.onChange, key: texture.id, texture: texture });
+    }).bind(this));
+    return React.createElement(
+      "div",
+      { id: "texture-list" },
+      React.createElement(
+        "ul",
+        null,
+        rows
+      )
+    );
+  }
+});
+
 var canvas = {},
     ctx = {};
+
+//テクスチャの読み込み
+//0番目は"テクスチャ無し"
+var textures = [{ id: 0 }];
+for (var i = 1; i < 6; i++) {
+  textures[i] = { id: i };
+  textures[i].img = new Image();
+  textures[i].img.src = "img/texture/" + i + ".png";
+  console.log(textures[i]);
+}
 
 var FaceCanvas = React.createClass({
   displayName: "FaceCanvas",
@@ -131,21 +174,21 @@ var FaceCanvas = React.createClass({
       }); //座標配列に追加してセット
     }
   },
-  clear: function clear() {
-    this.setState({ points: [], mousedown: false, length: 0 });
-  },
+  //clear() {
+  //  this.setState({points:[], mousedown: false, length: 0});
+  //},
   paint: function paint() {
-    if (!("fillStyle" in ctx)) {
-      return false;
-    } //初期化時はpaintしない
+    if (!("fillStyle" in ctx) | this.state.points.length < 1) {
+      return false; //初期化時はpaintしない
+    }
     var brush = this.props.brush,
-        pa = this.state.points,
+        points = this.state.points,
         l = this.state.length;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height); //canvasのリセットはできれば最小限にしたほうがいい
     if (brush.blur != 0) {
       //ぼかしはradialGradientを使う
       for (var i = 0; i < l; i++) {
-        var p = pa[i],
+        var p = points[i],
             grad = ctx.createRadialGradient(p[0], p[1], 10, p[0], p[1], brush.size / 2 + brush.blur);
         ctx.fillStyle = grad;
         grad.addColorStop(0, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0.1)");
@@ -159,7 +202,7 @@ var FaceCanvas = React.createClass({
       //ctx.arc(pa[0][0], pa[0][1], brush.size/2, 0, Math.PI*2, false);
       //ctx.fill();
       for (var i = 1; i < l; i++) {
-        var p = pa[i];
+        var p = points[i];
         //    pp = pa[i-1];
         //ctx.beginPath();
         //ctx.moveTo(pp[0], pp[1]);
@@ -170,6 +213,14 @@ var FaceCanvas = React.createClass({
         ctx.fill();
         //ctx.closePath();
       };
+    }
+
+    //テクスチャの描画
+    for (var i = 1; i < l; i += 15) {
+      var p = points[i];
+      if (textures[brush.textureIndex].img) {
+        ctx.drawImage(textures[brush.textureIndex].img, p[0] - (brush.size + brush.blur) / 2, p[1] - (brush.size + brush.blur) / 2, brush.size + brush.blur, brush.size + brush.blur);
+      }
     }
   },
   undoChange: function undoChange() {
@@ -184,11 +235,6 @@ var FaceCanvas = React.createClass({
         onMouseDown: this.onMouseDown, onMouseMove: this.onMouseMove, onMouseUp: this.onMouseUp,
         style: { opacity: this.props.brush.alpha / 100 } }),
       React.createElement("div", { id: "face-img" }),
-      React.createElement(
-        "button",
-        { id: "face-clear-button", onClick: this.clear },
-        "Clear"
-      ),
       React.createElement(
         "div",
         { className: "sliders", id: "sliders-undo" },
@@ -265,14 +311,15 @@ var Cosme = React.createClass({
   render: function render() {
     var cosme = this.props.cosme;
     var clrstr = [cosme.brush.color.r, cosme.brush.color.g, cosme.brush.color.b].join(",");
+    var textureStyle = cosme.brush.textureIndex > 0 ? "url(/img/texture/" + cosme.brush.textureIndex + ".png) no-repeat " + (20 - (cosme.brush.size + cosme.brush.blur) / 2) + "px center /" + (cosme.brush.size + cosme.brush.blur) + "px " + (cosme.brush.size + cosme.brush.blur) + "px, " : "";
+    var imageStyle = cosme.imgUrl ? ", url(" + cosme.imgUrl + ") no-repeat center right / contain" : "";
+    var style = {
+      background: textureStyle + "-webkit-gradient(radial, 20 center, " + (cosme.brush.size / 2 - cosme.brush.blur - 1) //startとendが同じだと表示されない
+       + ", 20 center, " + (cosme.brush.size / 2 + cosme.brush.blur) + ", from(rgba(" + clrstr + ",1)), to(rgba(" + clrstr + ",0)))" + imageStyle
+    };
     return React.createElement(
       "li",
-      { className: "cosme", onClick: this.onClick, style: {
-          background: "-webkit-gradient(radial, 20 center, " + (cosme.brush.size / 2 - cosme.brush.blur - 1) //startとendが同じだと表示されない
-           + ", 20 center, " + (cosme.brush.size / 2 + cosme.brush.blur) + ", from(rgba(" + clrstr + "," + cosme.brush.alpha / 100 + ")), to(rgba(" + clrstr + ",0)))" + (cosme.imgUrl ? ", url(" + cosme.imgUrl + ")" : ""),
-          backgroundPosition: "center center, right center",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "auto, contain" } },
+      { className: "cosme", onClick: this.onClick, style: style },
       React.createElement(
         "p",
         null,
@@ -335,15 +382,13 @@ var Brush = React.createClass({
   render: function render() {
     var brush = this.props.brush;
     var clrstr = [brush.color.r, brush.color.g, brush.color.b].join(",");
-    return React.createElement("div", { className: "brush", style: {
-        //width: brush.size+brush.blur*2,
-        //height: brush.size+brush.blur*2,
-        //top: 150-brush.size/2-brush.blur,
-        //left: 150-brush.size/2-brush.blur,
-        //borderRadius: brush.size/2+brush.blur,
-        //backgroundColor: rgbToHex(brush.color.r, brush.color.g, brush.color.b),
-        background: "-webkit-gradient(radial, center center, " + (brush.size / 2 - brush.blur - 1) //startとendが同じだと表示されない
-         + ", center center, " + (brush.size / 2 + brush.blur) + ", from(rgba(" + clrstr + "," + brush.alpha / 100 + ")), to(rgba(" + clrstr + ",0)))" } });
+    var textureStyle = brush.textureIndex > 0 ? "url(/img/texture/" + brush.textureIndex + ".png) no-repeat center center /" + (brush.size + brush.blur) + "px " + (brush.size + brush.blur) + "px, " : "";
+    var style = {
+      opacity: brush.alpha / 100,
+      background: textureStyle + "-webkit-gradient(radial, center center, " + (brush.size / 2 - brush.blur - 1) //startとendが同じだと表示されない
+       + ", center center, " + (brush.size / 2 + brush.blur) + ", from(rgba(" + clrstr + ",1)), to(rgba(" + clrstr + ",0)))"
+    };
+    return React.createElement("div", { className: "brush", style: style });
   }
 });
 
@@ -362,7 +407,8 @@ var App = React.createClass({
         },
         alpha: 100,
         size: 50,
-        blur: 0
+        blur: 0,
+        textureIndex: 0
       },
       cosmes: cosmes,
       isRegistering: false
@@ -387,7 +433,8 @@ var App = React.createClass({
     localStorage.setItem("cosmes", JSON.stringify(cosmes));
   },
   setCosme: function setCosme(cosme) {
-    this.setState({ brush: _.clone(cosme.brush, true) });
+    var brush = _.clone(cosme.brush); //そのままsetStateすると参照になり変更できてしまう
+    this.setState({ brush: brush, "true": true });
   },
   render: function render() {
     var brush = this.state.brush;
@@ -416,10 +463,11 @@ var App = React.createClass({
         " Blur:",
         brush.blur
       ),
-      React.createElement(ColorSliders, { onChange: this.changeBrush, color: brush.color }),
-      React.createElement(AlphaSliders, { onChange: this.changeBrush }),
-      React.createElement(SizeSliders, { onChange: this.changeBrush }),
-      React.createElement(BlurSliders, { onChange: this.changeBrush, size: brush.size }),
+      React.createElement(ColorSliders, { onChange: this.changeBrush, color: brush.color, values: brush.color }),
+      React.createElement(AlphaSliders, { onChange: this.changeBrush, value: brush.alpha }),
+      React.createElement(SizeSliders, { onChange: this.changeBrush, value: brush.size }),
+      React.createElement(BlurSliders, { onChange: this.changeBrush, size: brush.size, value: brush.blur }),
+      React.createElement(TextureList, { onChange: this.changeBrush, textures: textures }),
       React.createElement(FaceCanvas, { brush: brush, width: 500, height: 500 }),
       React.createElement(
         "button",

@@ -24,6 +24,10 @@ body {
 #sliders-alpha .slider, #sliders-blur .slider, #sliders-size .slider, #sliders-undo .slider {
   background-color: #333; }
 
+.texture {
+  width: 50px;
+  height: 50px; }
+
 #brush-container {
   position: relative;
   width: 300px;

@@ -23,10 +23,6 @@ gulp.task('server', ['mock'], function() {
     gulp.src('build')
         .pipe(server({
         livereload: true,
-        proxies: [{
-            source: '/json',
-            target: 'http://localhost:3000'
-        }],
         port: process.env.PORT || 5000, // localhost:5000
         open: true
     }));

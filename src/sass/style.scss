@@ -1,55 +1,120 @@
 $font-stack:    Helvetica, sans-serif;
 $primary-color: #333;
+$main-color: #FFFFFF;
+$accent-color: #D2C8B4;
 $slider-height: 20px;
+$handle-height: 24px;
+$canvas-size: 500px;
+
+html, body, #container {
+  width: 100%;
+  height: 100%;
+}
+
+#container {
+  display: flex;
+}
 
 body {
   font: 100% $font-stack;
   color: $primary-color;
+  margin: 0;
 }
 
-#ui {
+#left {
+  width: 30%;
+  height: 100%;
+  float: left;
   position: relative;
+  .sliders, #texture-list {
+    width: 70%;
+    margin: 10px auto;
+  }
 }
 
-.slider {
-  width: 100%;
-  max-width: 255px;
-  height: $slider-height;
+#right {
+  width: 30%;
+  height: 100%;
+  float: right;
+}
+
+#center {
+  width: 60%;
+  height: 100%;
+  float: left;
+  position: relative;
+  background-color: $primary-color;
 }
 
 .handle {
   width: 5px;
-  height: $slider-height;
-  background-color: rgba(255, 255, 255, 0.7);
+  height: $handle-height;
+  background-color: $primary-color;
+  opacity: 0.3;
+  margin-top: -($handle-height - $slider-height)/2;
 }
 
-.sliders-color-back {
-  margin-top: -$slider-height;
-  width: 100%;
-  max-width: 255px;
-  height: 20px;
+#sliders-color {
+  .slider {
+    width: 100%;
+    height: $slider-height;
+    margin: 10px auto;
+  }
 }
 
 #sliders-alpha, #sliders-blur, #sliders-size, #sliders-undo {
   .slider {
-    background-color: $primary-color;
+    background-color: $accent-color;
+    width: 100%;
+    height: $slider-height;
+  }
+}
+
+#texture-list ul {
+  width: 100;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  list-style: none;
+  li {
+    margin-bottom: 5px;
   }
 }
 
 .texture {
-  width: 50px;
-  height: 50px;
+  width: 30px;
+  height: 30px;
 }
 
-#brush-container {
-  position: relative;
-  width: 300px;
+#registration-open-button {
+  width: 100%;
+  height: 50px;
+  position: absolute;
+  bottom: 0;
+  background-color: $accent-color;
+  border: 0;
+}
+
+#registration-open-button:focus {
+  outline: none;
+}
+
+#brush-sample {
+  width: 100%;
   height: 300px;
-  .brush {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-  }
+}
+
+#face-container {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: $canvas-size;
+  height: $canvas-size;
 }
 
 div#face-img {
@@ -69,4 +134,15 @@ div#face-img {
 
 #registration-pane.dragging-over {
   border: solid 10px;
+}
+
+#cosme-list ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-size: small;
+  li {
+    padding: 15px 50px;
+    border-bottom: solid 1px $accent-color;
+  }
 }

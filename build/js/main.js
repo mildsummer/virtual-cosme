@@ -62,37 +62,37 @@ var ColorSliders = React.createClass({
         end: rgbToHex(255, this.props.color.g, this.props.color.b)
       },
       g: {
-        start: rgbToHex(this.props.color.g, 0, this.props.color.b),
-        end: rgbToHex(this.props.color.g, 255, this.props.color.b)
+        start: rgbToHex(this.props.color.r, 0, this.props.color.b),
+        end: rgbToHex(this.props.color.r, 255, this.props.color.b)
       },
       b: {
-        start: rgbToHex(this.props.color.g, this.props.color.g, 0),
-        end: rgbToHex(this.props.color.g, this.props.color.g, 255)
+        start: rgbToHex(this.props.color.r, this.props.color.g, 0),
+        end: rgbToHex(this.props.color.r, this.props.color.g, 255)
       }
     };
+    var style = {};
+    Object.keys(backColors).forEach(function (c) {
+      style[c] = {
+        //background: 'linear-gradient(left, ' + backColors.r.start + ', ' + backColors.r.end + ')',
+        background: "-webkit-gradient(linear, left top, right top, from(" + backColors[c].start + "), to(" + backColors[c].end + "))" };
+    });
     return React.createElement(
       "div",
       { className: "sliders", id: "sliders-color" },
       React.createElement(
         "div",
-        { id: "sliders-color-r" },
-        React.createElement(ReactSlider, { ref: "r", min: 0, max: 255, onChange: this.onChange, value: this.props.values.r }),
-        React.createElement("div", { className: "sliders-color-back", ref: "r_back", style: {
-            background: "-webkit-gradient(linear, left top, right top, from(" + backColors.r.start + "), to(" + backColors.r.end + "))" } })
+        { id: "sliders-color-r", style: style.r },
+        React.createElement(ReactSlider, { ref: "r", min: 0, max: 255, onChange: this.onChange, value: this.props.values.r })
       ),
       React.createElement(
         "div",
-        { id: "sliders-color-g" },
-        React.createElement(ReactSlider, { ref: "g", min: 0, max: 255, onChange: this.onChange, value: this.props.values.g }),
-        React.createElement("div", { className: "sliders-color-back", ref: "g_back", style: {
-            background: "-webkit-gradient(linear, left top, right top, from(" + backColors.g.start + "), to(" + backColors.g.end + "))" } })
+        { id: "sliders-color-g", style: style.g },
+        React.createElement(ReactSlider, { ref: "g", min: 0, max: 255, onChange: this.onChange, value: this.props.values.g })
       ),
       React.createElement(
         "div",
-        { id: "sliders-color-b" },
-        React.createElement(ReactSlider, { ref: "b", min: 0, max: 255, onChange: this.onChange, value: this.props.values.b }),
-        React.createElement("div", { className: "sliders-color-back", ref: "b_back", style: {
-            background: "-webkit-gradient(linear, left top, right top, from(" + backColors.b.start + "), to(" + backColors.b.end + "))" } })
+        { id: "sliders-color-b", style: style.b },
+        React.createElement(ReactSlider, { ref: "b", min: 0, max: 255, onChange: this.onChange, value: this.props.values.b })
       )
     );
   }
@@ -191,12 +191,12 @@ var FaceCanvas = React.createClass({
         var p = points[i],
             grad = ctx.createRadialGradient(p[0], p[1], 10, p[0], p[1], brush.size / 2 + brush.blur);
         ctx.fillStyle = grad;
-        grad.addColorStop(0, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0.1)");
+        grad.addColorStop((brush.size - brush.blur) / (brush.size + brush.blur), "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0.1)"); //積層するので0.1くらいでちょうどいい
         grad.addColorStop(1, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0)");
         ctx.fillRect(p[0] - brush.size / 2 - brush.blur, p[1] - brush.size / 2 - brush.blur, brush.size + brush.blur * 2, brush.size + brush.blur * 2);
       }
     } else {
-      ctx.fillStyle = rgbToHex(brush.color.r, brush.color.g, brush.color.b);
+      ctx.fillStyle = "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0.1)";
       //ctx.strokeStyle = rgbToHex(brush.color.r, brush.color.g, brush.color.b);
       //ctx.lineWidth = brush.size;
       //ctx.arc(pa[0][0], pa[0][1], brush.size/2, 0, Math.PI*2, false);
@@ -388,7 +388,7 @@ var Brush = React.createClass({
       background: textureStyle + "-webkit-gradient(radial, center center, " + (brush.size / 2 - brush.blur - 1) //startとendが同じだと表示されない
        + ", center center, " + (brush.size / 2 + brush.blur) + ", from(rgba(" + clrstr + ",1)), to(rgba(" + clrstr + ",0)))"
     };
-    return React.createElement("div", { className: "brush", style: style });
+    return React.createElement("div", { id: "brush-sample", style: style });
   }
 });
 
@@ -440,55 +440,37 @@ var App = React.createClass({
     var brush = this.state.brush;
     return React.createElement(
       "div",
-      { id: "ui" },
+      { id: "container" },
       this.state.isRegistering ? React.createElement(RegistrationPane, { onSubmit: this.register, close: this.toggleRegistrationPane }) : null,
       React.createElement(
         "div",
-        { id: "brush-container", ref: "brush-container" },
-        React.createElement(Brush, { brush: brush, content: null, position: "center center" })
+        { id: "left" },
+        React.createElement(Brush, { brush: brush, content: null, position: "center center" }),
+        React.createElement(ColorSliders, { onChange: this.changeBrush, color: brush.color, values: brush.color }),
+        React.createElement(AlphaSliders, { onChange: this.changeBrush, value: brush.alpha }),
+        React.createElement(SizeSliders, { onChange: this.changeBrush, value: brush.size }),
+        React.createElement(BlurSliders, { onChange: this.changeBrush, size: brush.size, value: brush.blur }),
+        React.createElement(TextureList, { onChange: this.changeBrush, textures: textures }),
+        React.createElement(
+          "button",
+          { id: "registration-open-button", onClick: this.toggleRegistrationPane },
+          "登録する"
+        )
       ),
       React.createElement(
-        "span",
-        null,
-        "R:",
-        brush.color.r,
-        " G:",
-        brush.color.g,
-        " B:",
-        brush.color.b,
-        " Alpha:",
-        brush.alpha,
-        " Size:",
-        brush.size,
-        " Blur:",
-        brush.blur
+        "div",
+        { id: "center" },
+        React.createElement(FaceCanvas, { brush: brush, width: 500, height: 500 })
       ),
-      React.createElement(ColorSliders, { onChange: this.changeBrush, color: brush.color, values: brush.color }),
-      React.createElement(AlphaSliders, { onChange: this.changeBrush, value: brush.alpha }),
-      React.createElement(SizeSliders, { onChange: this.changeBrush, value: brush.size }),
-      React.createElement(BlurSliders, { onChange: this.changeBrush, size: brush.size, value: brush.blur }),
-      React.createElement(TextureList, { onChange: this.changeBrush, textures: textures }),
-      React.createElement(FaceCanvas, { brush: brush, width: 500, height: 500 }),
       React.createElement(
-        "button",
-        { id: "registration-open-button", onClick: this.toggleRegistrationPane },
-        "登録する"
-      ),
-      React.createElement(CosmeList, { onClickCosme: this.setCosme, cosmes: this.state.cosmes })
+        "div",
+        { id: "right" },
+        React.createElement(CosmeList, { onClickCosme: this.setCosme, cosmes: this.state.cosmes })
+      )
     );
   }
 });
 
-React.render(React.createElement(App, null), document.getElementById("container"));
-
-//background: 'linear-gradient(left, ' + backColors.r.start + ', ' + backColors.r.end + ')',
+React.render(React.createElement(App, null), document.body);
 
 //background: '-moz-linear-gradient(left, ' + backColors.r.start + ',' + backColors.r.end + ')'
-
-//background: 'linear-gradient(left, ' + backColors.g.start + ', ' + backColors.g.end + ')',
-
-//background: '-moz-linear-gradient(left, ' + backColors.g.start + ',' + backColors.g.end + ')'
-
-//background: 'linear-gradient(left, ' + backColors.b.start + ', ' + backColors.b.end + ')',
-
-//background: '-moz-linear-gradient(left, ' + backColors.b.start + ',' + backColors.b.end + ')'

@@ -1,41 +1,92 @@
+html, body, #container {
+  width: 100%;
+  height: 100%; }
+
+#container {
+  display: flex; }
+
 body {
   font: 100% Helvetica, sans-serif;
-  color: #333; }
+  color: #333;
+  margin: 0; }
 
-#ui {
+#left {
+  width: 30%;
+  height: 100%;
+  float: left;
   position: relative; }
+  #left .sliders, #left #texture-list {
+    width: 70%;
+    margin: 10px auto; }
 
-.slider {
-  width: 100%;
-  max-width: 255px;
-  height: 20px; }
+#right {
+  width: 30%;
+  height: 100%;
+  float: right; }
+
+#center {
+  width: 60%;
+  height: 100%;
+  float: left;
+  position: relative;
+  background-color: #333; }
 
 .handle {
   width: 5px;
-  height: 20px;
-  background-color: rgba(255, 255, 255, 0.7); }
+  height: 24px;
+  background-color: #333;
+  opacity: 0.3;
+  margin-top: -2px; }
 
-.sliders-color-back {
-  margin-top: -20px;
+#sliders-color .slider {
   width: 100%;
-  max-width: 255px;
-  height: 20px; }
+  height: 20px;
+  margin: 10px auto; }
 
 #sliders-alpha .slider, #sliders-blur .slider, #sliders-size .slider, #sliders-undo .slider {
-  background-color: #333; }
+  background-color: #D2C8B4;
+  width: 100%;
+  height: 20px; }
+
+#texture-list ul {
+  width: 100;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  list-style: none; }
+  #texture-list ul li {
+    margin-bottom: 5px; }
 
 .texture {
-  width: 50px;
-  height: 50px; }
+  width: 30px;
+  height: 30px; }
 
-#brush-container {
-  position: relative;
-  width: 300px;
+#registration-open-button {
+  width: 100%;
+  height: 50px;
+  position: absolute;
+  bottom: 0;
+  background-color: #D2C8B4;
+  border: 0; }
+
+#registration-open-button:focus {
+  outline: none; }
+
+#brush-sample {
+  width: 100%;
   height: 300px; }
-  #brush-container .brush {
-    width: 100%;
-    height: 100%;
-    position: absolute; }
+
+#face-container {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 500px;
+  height: 500px; }
 
 div#face-img {
   margin-top: -500px;
@@ -52,3 +103,12 @@ div#face-img {
 
 #registration-pane.dragging-over {
   border: solid 10px; }
+
+#cosme-list ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-size: small; }
+  #cosme-list ul li {
+    padding: 15px 50px;
+    border-bottom: solid 1px #D2C8B4; }

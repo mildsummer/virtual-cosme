@@ -53,48 +53,32 @@ var ColorSliders = React.createClass({
                 end: rgbToHex(255, this.props.color.g, this.props.color.b)
             },
             g: {
-                start: rgbToHex(this.props.color.g, 0, this.props.color.b),
-                end: rgbToHex(this.props.color.g, 255, this.props.color.b)
+                start: rgbToHex(this.props.color.r, 0, this.props.color.b),
+                end: rgbToHex(this.props.color.r, 255, this.props.color.b)
             },
             b: {
-                start: rgbToHex(this.props.color.g, this.props.color.g, 0),
-                end: rgbToHex(this.props.color.g, this.props.color.g, 255)
+                start: rgbToHex(this.props.color.r, this.props.color.g, 0),
+                end: rgbToHex(this.props.color.r, this.props.color.g, 255)
             }
         }
+        var style = {};
+        Object.keys(backColors).forEach(function(c){
+          style[c] = {
+            //background: 'linear-gradient(left, ' + backColors.r.start + ', ' + backColors.r.end + ')',
+            background: '-webkit-gradient(linear, left top, right top, from(' + backColors[c].start + '), to(' + backColors[c].end + '))',
+            //background: '-moz-linear-gradient(left, ' + backColors.r.start + ',' + backColors.r.end + ')'
+          }
+        });
         return (
             <div className="sliders" id="sliders-color">
-                <div id="sliders-color-r">
+                <div id="sliders-color-r" style={style.r} >
                     <ReactSlider ref="r" min={0} max={255} onChange={this.onChange} value={this.props.values.r} />
-                    <div className="sliders-color-back" ref="r_back" style={
-                        {
-                          //background: 'linear-gradient(left, ' + backColors.r.start + ', ' + backColors.r.end + ')',
-                          background: '-webkit-gradient(linear, left top, right top, from(' + backColors.r.start + '), to(' + backColors.r.end + '))',
-                          //background: '-moz-linear-gradient(left, ' + backColors.r.start + ',' + backColors.r.end + ')'
-                        }
-                      }>
-                    </div>
                 </div>
-                <div id="sliders-color-g">
+                <div id="sliders-color-g" style={style.g} >
                     <ReactSlider ref="g" min={0} max={255} onChange={this.onChange} value={this.props.values.g} />
-                    <div className="sliders-color-back" ref="g_back" style={
-                        {
-                          //background: 'linear-gradient(left, ' + backColors.g.start + ', ' + backColors.g.end + ')',
-                          background: '-webkit-gradient(linear, left top, right top, from(' + backColors.g.start + '), to(' + backColors.g.end + '))',
-                          //background: '-moz-linear-gradient(left, ' + backColors.g.start + ',' + backColors.g.end + ')'
-                        }
-                      }>
-                    </div>
                 </div>
-                <div id="sliders-color-b">
+                <div id="sliders-color-b" style={style.b} >
                     <ReactSlider ref="b" min={0} max={255} onChange={this.onChange} value={this.props.values.b} />
-                    <div className="sliders-color-back" ref="b_back" style={
-                        {
-                          //background: 'linear-gradient(left, ' + backColors.b.start + ', ' + backColors.b.end + ')',
-                          background: '-webkit-gradient(linear, left top, right top, from(' + backColors.b.start + '), to(' + backColors.b.end + '))',
-                          //background: '-moz-linear-gradient(left, ' + backColors.b.start + ',' + backColors.b.end + ')'
-                        }
-                      }>
-                    </div>
                 </div>
             </div>
         );
@@ -187,12 +171,12 @@ var FaceCanvas = React.createClass({
           var p = points[i],
             grad = ctx.createRadialGradient(p[0], p[1], 10, p[0], p[1], brush.size/2+brush.blur);
           ctx.fillStyle = grad;
-          grad.addColorStop(0, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0.1)");
+          grad.addColorStop((brush.size-brush.blur)/(brush.size+brush.blur), "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0.1)");//積層するので0.1くらいでちょうどいい
           grad.addColorStop(1, "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0)");
           ctx.fillRect(p[0]-brush.size/2-brush.blur, p[1]-brush.size/2-brush.blur, brush.size+brush.blur*2, brush.size+brush.blur*2);
         }
       } else {
-        ctx.fillStyle = rgbToHex(brush.color.r, brush.color.g, brush.color.b);
+        ctx.fillStyle = "rgba(" + [brush.color.r, brush.color.g, brush.color.b].join(",") + ", 0.1)";
         //ctx.strokeStyle = rgbToHex(brush.color.r, brush.color.g, brush.color.b);
         //ctx.lineWidth = brush.size;
         //ctx.arc(pa[0][0], pa[0][1], brush.size/2, 0, Math.PI*2, false);
@@ -370,7 +354,7 @@ var Brush = React.createClass({
             + ', from(rgba(' + clrstr + ',1)), to(rgba(' + clrstr + ',0)))'
           };
       return (
-        <div className="brush" style={style}></div>
+        <div id="brush-sample" style={style}></div>
       )
     }
 });
@@ -420,23 +404,26 @@ var App = React.createClass({
     render() {
         var brush = this.state.brush;
         return(
-            <div id="ui">
+            <div id="container">
                 {this.state.isRegistering ? (<RegistrationPane onSubmit={this.register} close={this.toggleRegistrationPane} />) : null}
-                <div id="brush-container" ref="brush-container">
+                <div id="left">
                   <Brush brush={brush} content={null} position="center center"/>
+                  <ColorSliders onChange={this.changeBrush} color={brush.color} values={brush.color} />
+                  <AlphaSliders onChange={this.changeBrush} value={brush.alpha} />
+                  <SizeSliders onChange={this.changeBrush} value={brush.size} />
+                  <BlurSliders onChange={this.changeBrush} size={brush.size} value={brush.blur} />
+                  <TextureList onChange={this.changeBrush} textures={textures} />
+                  <button id="registration-open-button" onClick={this.toggleRegistrationPane} >登録する</button>
                 </div>
-                <span>R:{brush.color.r} G:{brush.color.g} B:{brush.color.b} Alpha:{brush.alpha} Size:{brush.size} Blur:{brush.blur}</span>
-                <ColorSliders onChange={this.changeBrush} color={brush.color} values={brush.color} />
-                <AlphaSliders onChange={this.changeBrush} value={brush.alpha} />
-                <SizeSliders onChange={this.changeBrush} value={brush.size} />
-                <BlurSliders onChange={this.changeBrush} size={brush.size} value={brush.blur} />
-                <TextureList onChange={this.changeBrush} textures={textures} />
-                <FaceCanvas brush={brush} width={500} height={500} />
-                <button id="registration-open-button" onClick={this.toggleRegistrationPane} >登録する</button>
-                <CosmeList onClickCosme={this.setCosme} cosmes={this.state.cosmes} />
+                <div id="center">
+                  <FaceCanvas brush={brush} width={500} height={500} />
+                </div>
+                <div id="right">
+                  <CosmeList onClickCosme={this.setCosme} cosmes={this.state.cosmes} />
+                </div>
             </div>
         );
     }
 });
 
-React.render(<App />, document.getElementById("container"));
+React.render(<App />, document.body);

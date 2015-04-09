@@ -106,7 +106,8 @@ var Texture = React.createClass({
   },
   render: function render() {
     var texture = this.props.texture;
-    return React.createElement("li", { className: "texture", onClick: this.onClick, style: {
+    var className = this.props.isSelected ? "texture selected" : "texture";
+    return React.createElement("li", { className: className, onClick: this.onClick, style: {
         background: texture.id > 0 ? "url(/img/texture/" + texture.id + ".png) no-repeat center center / contain, #333" : "#333"
       } });
   }
@@ -117,7 +118,7 @@ var TextureList = React.createClass({
 
   render: function render() {
     var rows = this.props.textures.map((function (texture) {
-      return React.createElement(Texture, { onClickTexture: this.props.onChange, key: texture.id, texture: texture });
+      return React.createElement(Texture, { isSelected: this.props.selected === texture.id, onClickTexture: this.props.onChange, key: texture.id, texture: texture });
     }).bind(this));
     return React.createElement(
       "div",
@@ -450,7 +451,7 @@ var App = React.createClass({
         React.createElement(AlphaSliders, { onChange: this.changeBrush, value: brush.alpha }),
         React.createElement(SizeSliders, { onChange: this.changeBrush, value: brush.size }),
         React.createElement(BlurSliders, { onChange: this.changeBrush, size: brush.size, value: brush.blur }),
-        React.createElement(TextureList, { onChange: this.changeBrush, textures: textures }),
+        React.createElement(TextureList, { onChange: this.changeBrush, textures: textures, selected: brush.textureIndex }),
         React.createElement(
           "button",
           { id: "registration-open-button", onClick: this.toggleRegistrationPane },

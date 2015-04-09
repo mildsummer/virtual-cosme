@@ -91,8 +91,9 @@ var Texture = React.createClass({
     },
     render: function() {
         var texture = this.props.texture;
+        var className = this.props.isSelected ? "texture selected" : "texture";
         return (
-          <li className="texture" onClick={this.onClick} style={{
+          <li className={className} onClick={this.onClick} style={{
               background: texture.id > 0 ? 'url(/img/texture/' + texture.id + '.png) no-repeat center center / contain, #333' : '#333'
             }}></li>
         )
@@ -102,7 +103,7 @@ var Texture = React.createClass({
 var TextureList = React.createClass({
     render: function() {
       var rows = this.props.textures.map((function(texture) {
-        return (<Texture onClickTexture={this.props.onChange} key={texture.id} texture={texture} />);
+        return (<Texture isSelected={this.props.selected === texture.id} onClickTexture={this.props.onChange} key={texture.id} texture={texture} />);
       }).bind(this));
       return (
         <div id="texture-list">
@@ -412,7 +413,7 @@ var App = React.createClass({
                   <AlphaSliders onChange={this.changeBrush} value={brush.alpha} />
                   <SizeSliders onChange={this.changeBrush} value={brush.size} />
                   <BlurSliders onChange={this.changeBrush} size={brush.size} value={brush.blur} />
-                  <TextureList onChange={this.changeBrush} textures={textures} />
+                  <TextureList onChange={this.changeBrush} textures={textures} selected={brush.textureIndex} />
                   <button id="registration-open-button" onClick={this.toggleRegistrationPane} >登録する</button>
                 </div>
                 <div id="center">

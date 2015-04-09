@@ -2,24 +2,36 @@ var gulp = require('gulp'),
     babel = require('gulp-babel'),
     sass = require('gulp-sass'),
     server = require('gulp-webserver'),
-    MockServer = require('easymock').MockServer;
+    browserify = require('browserify'),
+    babelify = require('babelify'),
+    source = require('vinyl-source-stream');
+    //MockServer = require('easymock').MockServer;
 
 gulp.task('js', function() {
-    gulp.src(['src/js/*.js'])
-        .pipe(babel())
-        .pipe(gulp.dest('build/js'));
+    browserify({
+      entries: './src/js/main.js',
+      cache: {},
+      packageCache: {},
+      fullPaths: false,
+      debug: true
+    })
+    .transform(babelify.configure({
+    }))
+    .bundle()
+    .pipe(source('main.js'))
+    .pipe(gulp.dest('build/js'));
 });
 
-gulp.task('mock', function () {
-    var ms = new MockServer({
-        keepalive: true,
-        port: 3000,
-        path: './json',
-    });
-    ms.start();
-});
+//gulp.task('mock', function () {
+//    var ms = new MockServer({
+//        keepalive: true,
+//        port: 3000,
+//        path: './json',
+//    });
+//    ms.start();
+//});
 
-gulp.task('server', ['mock'], function() {
+gulp.task('server', function() {
     gulp.src('build')
         .pipe(server({
         livereload: true,

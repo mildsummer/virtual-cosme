@@ -151,21 +151,20 @@ div#face-img {
   background-color: rgba(0,0,0,0.6);
   #registration-container {
     position: absolute;
-    width: 300px;
-    height: 500px;
+    width: 400px;
+    height: 150px;
     margin: auto;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background-color: $accent-color;
-    form {
-      padding: 10%;
-      input {
-        display: block;
-        border: 0;
-        margin: auto;
-      }
+    input {
+      display: block;
+      border: solid 1px $accent-color;
+      width: 200px;
+      height: 20px;
+      margin: 20px auto;
     }
   }
 }

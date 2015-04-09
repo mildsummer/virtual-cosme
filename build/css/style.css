@@ -115,20 +115,20 @@ div#face-img {
   background-color: rgba(0, 0, 0, 0.6); }
   #registration-pane #registration-container {
     position: absolute;
-    width: 300px;
-    height: 500px;
+    width: 400px;
+    height: 150px;
     margin: auto;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background-color: #D2C8B4; }
-    #registration-pane #registration-container form {
-      padding: 10%; }
-      #registration-pane #registration-container form input {
-        display: block;
-        border: 0;
-        margin: auto; }
+    #registration-pane #registration-container input {
+      display: block;
+      border: solid 1px #D2C8B4;
+      width: 200px;
+      height: 20px;
+      margin: 20px auto; }
 
 #registration-pane.dragging-over {
   border: solid 10px; }

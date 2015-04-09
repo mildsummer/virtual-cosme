@@ -61,7 +61,7 @@ var App = React.createClass({
         var brush = this.state.brush;
         return(
             <div id="container">
-                {this.state.isRegistering ? (<RegistrationPane onSubmit={this.register} close={this.toggleRegistrationPane} />) : null}
+                {this.state.isRegistering ? (<RegistrationPane brush={this.state.brush} onSubmit={this.register} close={this.toggleRegistrationPane} />) : null}
                 <div id="left">
                   <Brush brush={brush} content={null} position="center center"/>
                   <ColorSliders onChange={this.changeBrush} color={brush.color} values={brush.color} />

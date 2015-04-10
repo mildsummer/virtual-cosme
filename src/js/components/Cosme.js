@@ -18,9 +18,9 @@ var Cosme = React.createClass({
             };
         return (
           <li className="cosme" onClick={this.onClick} style={style}>
-            <p>{cosme.name}<br />
-            {cosme.colorName}<br />
-            /{cosme.brand}</p>
+            <p><span className="cosme-name">{cosme.name}</span><br />
+            <span className="cosme-colorname">{cosme.colorName}</span><br />
+            <span className="cosme-brand">/{cosme.brand}</span></p>
           </li>
         );
     }

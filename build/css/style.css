@@ -10,6 +10,23 @@ body {
   color: #000;
   margin: 0; }
 
+button {
+  border: 0;
+  background-color: #D2C8B4;
+  cursor: pointer; }
+
+button:focus {
+  outline: none; }
+
+button:hover {
+  background-color: #ac9974; }
+
+input {
+  border: solid 1px #D2C8B4; }
+
+input:focus {
+  outline: 1px #D2C8B4 solid; }
+
 #left {
   width: 30%;
   height: 100%;
@@ -38,6 +55,9 @@ body {
   opacity: 0.3;
   margin-top: -2px; }
 
+.slider {
+  cursor: pointer; }
+
 #sliders-color .slider {
   width: 100%;
   height: 20px;
@@ -57,7 +77,8 @@ body {
   justify-content: space-between;
   list-style: none; }
   #texture-list ul li {
-    margin-bottom: 5px; }
+    margin-bottom: 5px;
+    cursor: pointer; }
 
 .texture {
   width: 30px;
@@ -67,16 +88,11 @@ body {
   border: solid 2px #D2C8B4;
   margin: -2px; }
 
-#registration-open-button {
+button#registration-open-button {
   width: 100%;
   height: 60px;
   position: absolute;
-  bottom: 0;
-  background-color: #D2C8B4;
-  border: 0; }
-
-#registration-open-button:focus {
-  outline: none; }
+  bottom: 0; }
 
 #brush-sample {
   width: 100%;
@@ -92,7 +108,8 @@ body {
   width: 500px;
   height: 540px; }
   #face-container canvas#face {
-    display: block; }
+    display: block;
+    cursor: crosshair; }
 
 #sliders-undo {
   margin-top: 20px; }
@@ -114,33 +131,44 @@ div#face-img {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6); }
   #registration-pane #registration-container {
+    width: 550px;
+    height: 250px;
     position: absolute;
-    width: 500px;
-    height: 200px;
     margin: auto;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background-color: #D2C8B4; }
-    #registration-pane #registration-container input {
-      display: block;
-      border: solid 1px #D2C8B4;
-      width: 200px;
-      height: 20px;
-      margin: 20px auto; }
-    #registration-pane #registration-container div {
+    bottom: 0; }
+    #registration-pane #registration-container div#registration-input {
+      padding-top: 20px;
+      width: 550px;
+      height: 200px;
       text-align: center;
       font-size: small; }
+      #registration-pane #registration-container div#registration-input input {
+        display: block;
+        width: 200px;
+        height: 20px;
+        margin: 20px auto; }
+    #registration-pane #registration-container div#registration-button {
+      margin-top: 20px;
+      text-align: center; }
+      #registration-pane #registration-container div#registration-button button {
+        width: 150px;
+        height: 30px;
+        margin: 0 10px; }
 
 #registration-pane.dragging-over {
-  border: solid 10px; }
+  background-color: rgba(210, 200, 180, 0.6); }
 
 #cosme-list ul {
   padding: 0;
   margin: 0;
   list-style: none;
-  font-size: small; }
+  font-size: small;
+  cursor: pointer; }
   #cosme-list ul li {
     padding: 15px 80px;
     border-bottom: solid 1px #D2C8B4; }
+  #cosme-list ul li:hover {
+    border-left: solid 5px #D2C8B4; }

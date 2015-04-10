@@ -36,9 +36,13 @@ var App = React.createClass({
       };
     },
     changeBrush(key, param) {
-      var state = _.clone(this.state, true);
-      state.brush[key] = param;
-      this.setState(state);
+      var brush = _.clone(this.state.brush, true);
+      //size/2<blurにならないようにする（sizeを変更するときだけ)
+      if(key=="size"&&param/2<brush.blur){
+        brush.blur = param/2;
+      }
+      brush[key] = param;
+      this.setState({brush: brush});
     },
     toggleRegistrationPane() {
       this.setState({isRegistering: !this.state.isRegistering});

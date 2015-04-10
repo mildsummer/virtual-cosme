@@ -21,6 +21,28 @@ body {
   margin: 0;
 }
 
+button {
+  border: 0;
+  background-color: $accent-color;
+  cursor: pointer;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:hover {
+  background-color: darken($accent-color, 20%);
+}
+
+input {
+  border: solid 1px $accent-color;
+}
+
+input:focus {
+  outline: 1px $accent-color solid;
+}
+
 #left {
   width: 30%;
   height: 100%;
@@ -54,6 +76,10 @@ body {
   margin-top: -($handle-height - $slider-height)/2;
 }
 
+.slider {
+  cursor: pointer;
+}
+
 #sliders-color {
   .slider {
     width: 100%;
@@ -80,6 +106,7 @@ body {
   list-style: none;
   li {
     margin-bottom: 5px;
+    cursor: pointer;
   }
 }
 
@@ -93,17 +120,11 @@ body {
   margin: -2px;
 }
 
-#registration-open-button {
+button#registration-open-button {
   width: 100%;
   height: 60px;
   position: absolute;
   bottom: 0;
-  background-color: $accent-color;
-  border: 0;
-}
-
-#registration-open-button:focus {
-  outline: none;
 }
 
 #brush-sample {
@@ -122,6 +143,7 @@ body {
   height: $canvas-size + 40;
   canvas#face {
     display: block;
+    cursor: crosshair;
   }
 }
 
@@ -150,31 +172,41 @@ div#face-img {
   height: 100%;
   background-color: rgba(0,0,0,0.6);
   #registration-container {
+    width: 550px;
+    height: 250px;
     position: absolute;
-    width: 500px;
-    height: 200px;
     margin: auto;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: $accent-color;
-    input {
-      display: block;
-      border: solid 1px $accent-color;
-      width: 200px;
-      height: 20px;
-      margin: 20px auto;
-    }
-    div {
+    div#registration-input {
+      padding-top: 20px;
+      width: 550px;
+      height: 200px;
       text-align: center;
       font-size: small;
+      input {
+        display: block;
+        width: 200px;
+        height: 20px;
+        margin: 20px auto;
+      }
+    }
+    div#registration-button {
+      margin-top: 20px;
+      text-align: center;
+      button {
+        width:  150px;
+        height: 30px;
+        margin: 0 10px;
+      }
     }
   }
 }
 
 #registration-pane.dragging-over {
-  border: solid 10px;
+  background-color: rgba($accent-color, 0.6);
 }
 
 #cosme-list ul {
@@ -182,8 +214,12 @@ div#face-img {
   margin: 0;
   list-style: none;
   font-size: small;
+  cursor: pointer;
   li {
     padding: 15px 80px;
     border-bottom: solid 1px $accent-color;
+  }
+  li:hover {
+    border-left: solid 5px $accent-color;
   }
 }

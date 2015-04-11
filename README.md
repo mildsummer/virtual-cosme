@@ -28,9 +28,5 @@ Run a gulp. Then, the browser will start up.
     gulp
 
 
-
-## Lisence
-MIT
-
 ## Author
 [mildsummer](https://github.com/mildsummer)
